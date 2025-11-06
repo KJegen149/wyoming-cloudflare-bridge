@@ -70,6 +70,7 @@ async def main() -> None:
                             url="https://github.com/openai/whisper",
                         ),
                         installed=True,
+                        version="1.0.0",
                         languages=["en", "es", "fr", "de", "it", "pt", "nl", "pl", "ru", "ja", "ko", "zh"],
                     )
                 ],
@@ -93,6 +94,7 @@ async def main() -> None:
                             url="https://deepgram.com/",
                         ),
                         installed=True,
+                        version="1.0.0",
                         languages=["en"],
                     )
                 ],
