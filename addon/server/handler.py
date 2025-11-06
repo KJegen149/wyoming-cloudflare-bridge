@@ -12,9 +12,7 @@ from wyoming.audio import AudioChunk, AudioStart, AudioStop
 from wyoming.event import Event
 from wyoming.info import Describe, Info
 from wyoming.server import AsyncEventHandler
-from wyoming.tts import Synthesize, SynthesizeVoice
-from wyoming.tts import AudioStart as TtsAudioStart
-from wyoming.tts import AudioStop as TtsAudioStop
+from wyoming.tts import Synthesize
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -195,7 +193,7 @@ class CloudflareEventHandler(AsyncEventHandler):
 
                         # Send audio start event
                         await self.write_event(
-                            TtsAudioStart(
+                            AudioStart(
                                 rate=sample_rate,
                                 width=sample_width,
                                 channels=channels,
@@ -216,7 +214,7 @@ class CloudflareEventHandler(AsyncEventHandler):
                             )
 
                         # Send audio stop event
-                        await self.write_event(TtsAudioStop().event())
+                        await self.write_event(AudioStop().event())
                     else:
                         error_text = await response.text()
                         _LOGGER.error(
