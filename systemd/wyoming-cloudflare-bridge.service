@@ -1,0 +1,17 @@
+[Unit]
+Description=Wyoming Cloudflare Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=wyoming
+Group=wyoming
+WorkingDirectory=/opt/wyoming-cloudflare-bridge/server
+Environment="STT_URL=https://wyoming-stt.YOUR_SUBDOMAIN.workers.dev"
+Environment="TTS_URL=https://wyoming-tts.YOUR_SUBDOMAIN.workers.dev"
+ExecStart=/opt/wyoming-cloudflare-bridge/venv/bin/python -m server --uri tcp://0.0.0.0:10300 --stt-url ${STT_URL} --tts-url ${TTS_URL} --log-level INFO
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

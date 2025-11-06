@@ -1,0 +1,183 @@
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          YOUR SETUP                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+
+BEFORE (What you have now):
+════════════════════════════
+
+┌──────────────┐                    ┌─────────────────┐
+│  Satellite   │                    │  Raspberry Pi 5 │
+│              │                    │                 │
+│  Mic + Spk   │                    │  Home Assistant │
+└──────────────┘                    └─────────────────┘
+
+
+AFTER (What you'll have):
+═════════════════════════════
+
+┌──────────────┐                    ┌─────────────────────────────────┐
+│  Satellite 1 │────┐               │     Raspberry Pi 5              │
+│              │    │               │                                 │
+│  Mic + Spk   │    │               │  ┌──────────────────────────┐  │
+└──────────────┘    │               │  │   Home Assistant         │  │
+                    │               │  │   (port 8123)            │  │
+┌──────────────┐    ├──Wyoming──────▶  └──────────────────────────┘  │
+│  Satellite 2 │────┤  Protocol     │           ▲                     │
+│              │    │  (port 10300) │           │                     │
+│  Mic + Spk   │    │               │  ┌────────┴─────────────────┐  │
+└──────────────┘    │               │  │   Wyoming Bridge         │  │
+                    │               │  │   Python Service  ←NEW!  │  │
+┌──────────────┐    │               │  │   (~100MB RAM)           │  │
+│  Satellite 3 │────┘               │  └──────────┬───────────────┘  │
+│              │                    │             │                   │
+│  Mic + Spk   │                    └─────────────┼───────────────────┘
+└──────────────┘                                  │
+                                                  │ HTTPS
+                                                  ▼
+                                    ┌──────────────────────────────┐
+                                    │   Cloudflare Edge Network    │
+                                    │                              │
+                                    │  ┌────────────────────────┐ │
+                                    │  │  STT Worker (Whisper)  │ │
+                                    │  │  Free Tier: 10k/day    │ │
+                                    │  └────────────────────────┘ │
+                                    │                              │
+                                    │  ┌────────────────────────┐ │
+                                    │  │  TTS Worker (Aura)     │ │
+                                    │  │  Free Tier: 10k/day    │ │
+                                    │  └────────────────────────┘ │
+                                    └──────────────────────────────┘
+
+
+WHAT'S NEW?
+═══════════
+
+1. Wyoming Bridge on Pi 5 (ONE Python service)
+2. Two Cloudflare Workers (Cloud-based, no local resources)
+
+
+DATA FLOW:
+══════════
+
+Speech-to-Text:
+┌──────────┐  Audio   ┌────────┐  Audio   ┌──────────┐  Text   ┌──────────┐
+│Satellite │ ────────▶│ Bridge │ ────────▶│Cloudflare│ ───────▶│   Home   │
+│          │ Wyoming  │  (Pi5) │  HTTPS   │  Whisper │  Result │Assistant │
+└──────────┘          └────────┘          └──────────┘         └──────────┘
+
+Text-to-Speech:
+┌──────────┐  Text    ┌────────┐  Text    ┌──────────┐  Audio  ┌──────────┐
+│   Home   │ ────────▶│ Bridge │ ────────▶│Cloudflare│ ───────▶│Satellite │
+│Assistant │ Wyoming  │  (Pi5) │  HTTPS   │   Aura   │  Result │          │
+└──────────┘          └────────┘          └──────────┘         └──────────┘
+
+
+RESOURCE USAGE:
+═══════════════
+
+Raspberry Pi 5:
+  Before: ~1.5GB RAM (Home Assistant)
+  After:  ~1.6GB RAM (Home Assistant + Bridge)
+  Added:  ~100MB RAM, 20MB disk
+  
+Cloudflare:
+  Free tier: 10,000 neurons/day
+  Your usage: ~20-50 neurons per command
+  Capacity: ~200-500 commands/day
+  
+Satellites:
+  No change! Same as before
+
+
+DEPLOYMENT LOCATIONS:
+═════════════════════
+
+Your Computer:
+  1. Deploy Cloudflare Workers (using wrangler CLI)
+  2. Transfer server code to Pi (using deploy-to-pi.sh)
+  
+Raspberry Pi 5:
+  1. Install Python dependencies
+  2. Create SystemD service
+  
+Home Assistant:
+  1. Add Wyoming integration (UI)
+  2. Create Voice Assistant (UI)
+  
+Satellites:
+  1. Update connection URI to point to Pi 5
+
+
+NO DOCKER NEEDED!
+═════════════════
+
+Instead of:
+  Docker Container (200MB RAM)
+    └─ Python App (100MB RAM)
+  
+You get:
+  Native Python Service (100MB RAM)
+    └─ Managed by SystemD
+  
+Benefits: Faster, lighter, simpler!
+
+
+TOTAL NEW RESOURCES:
+════════════════════
+
+Local (Pi 5):
+  - 1 Python service
+  - ~100MB RAM
+  - ~20MB disk
+  - ~2-5% CPU idle
+  
+Cloud (Cloudflare):
+  - 2 Workers (no cost, runs on their edge)
+  - Free tier: 10,000 neurons/day
+  
+Your Computer:
+  - Nothing! (Just used for deployment)
+
+
+WHAT YOU DON'T NEED:
+═════════════════════
+
+✗ Docker
+✗ Docker Compose
+✗ Container runtime
+✗ Separate servers
+✗ API keys
+✗ Credit card
+✗ Monthly fees
+✗ Additional hardware
+✗ Complex networking
+✗ Port forwarding (all local)
+
+
+LATENCY BREAKDOWN:
+══════════════════
+
+Total: 2-4 seconds (comparable to Google Home)
+
+Wake word detection:  200-400ms  (optional, on Pi 5)
+Audio capture:        500-1000ms (satellite)
+STT processing:       400-800ms  (Cloudflare)
+Intent processing:    100-300ms  (Home Assistant)
+TTS processing:       300-600ms  (Cloudflare)
+Audio playback:       500-1000ms (satellite)
+
+
+SIMPLIFIED VIEW:
+════════════════
+
+┌──────────────┐
+│  Satellites  │ ──Wyoming──▶ ┌─────────────────┐
+│ (unchanged)  │   Protocol   │   Pi 5          │
+└──────────────┘              │                 │
+                              │  Home Assistant │
+                              │       +         │ ──HTTPS──▶ Cloudflare
+                              │  Wyoming Bridge │            (STT + TTS)
+                              │    (NEW!)       │
+                              └─────────────────┘
+
+That's it! One new service on your existing Pi 5.
