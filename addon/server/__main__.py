@@ -61,6 +61,7 @@ async def main() -> None:
                     url="https://developers.cloudflare.com/workers-ai/",
                 ),
                 installed=True,
+                version="1.0.0",
                 models=[
                     AsrModel(
                         name="whisper",
@@ -85,6 +86,7 @@ async def main() -> None:
                     url="https://developers.cloudflare.com/workers-ai/",
                 ),
                 installed=True,
+                version="1.0.0",
                 voices=[
                     TtsVoice(
                         name="aura-en",
