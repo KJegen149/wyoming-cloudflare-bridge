@@ -110,9 +110,11 @@ async def main() -> None:
     _LOGGER.info(f"Listening on: {args.uri}")
 
     # Start server
-    server = AsyncServer.from_uri(args.uri)
-
     try:
+        server = AsyncServer.from_uri(args.uri)
+        _LOGGER.info("Server created successfully")
+
+        _LOGGER.info("Starting server loop...")
         await server.run(
             partial(
                 CloudflareEventHandler,
@@ -123,6 +125,9 @@ async def main() -> None:
         )
     except KeyboardInterrupt:
         _LOGGER.info("Shutting down...")
+    except Exception as e:
+        _LOGGER.error(f"Server error: {e}", exc_info=True)
+        raise
 
 
 if __name__ == "__main__":
