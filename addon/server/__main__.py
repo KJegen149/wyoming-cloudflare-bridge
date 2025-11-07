@@ -113,16 +113,28 @@ async def main() -> None:
     try:
         server = AsyncServer.from_uri(args.uri)
         _LOGGER.info("Server created successfully")
+        _LOGGER.info(f"Server type: {type(server)}")
+        _LOGGER.info(f"Server URI: {server.uri if hasattr(server, 'uri') else 'unknown'}")
 
         _LOGGER.info("Starting server loop...")
-        await server.run(
-            partial(
-                CloudflareEventHandler,
-                wyoming_info,
-                args.stt_url,
-                args.tts_url,
-            )
+
+        # Run server with handler factory
+        handler_factory = partial(
+            CloudflareEventHandler,
+            wyoming_info,
+            args.stt_url,
+            args.tts_url,
         )
+
+        _LOGGER.info("Calling server.run()...")
+        result = await server.run(handler_factory)
+        _LOGGER.warning(f"Server.run() returned unexpectedly with: {result}")
+
+        # Keep alive if server exits
+        _LOGGER.info("Entering keep-alive loop...")
+        while True:
+            await asyncio.sleep(1)
+
     except KeyboardInterrupt:
         _LOGGER.info("Shutting down...")
     except Exception as e:
