@@ -1,5 +1,5 @@
 name: Wyoming Cloudflare Bridge
-version: "1.0.1"
+version: "1.0.2"
 slug: wyoming-cloudflare-bridge
 description: Wyoming Protocol bridge to Cloudflare Workers AI for Speech-to-Text and Text-to-Speech
 url: https://github.com/KJegen149/wyoming-cloudflare-bridge
@@ -9,12 +9,13 @@ arch:
   - armhf
   - armv7
 init: false
-startup: services
-host_network: true
+startup: application
+host_network: false
 ports:
   10300/tcp: 10300
 ports_description:
   10300/tcp: Wyoming Protocol server port
+ingress: false
 options:
   stt_url: ""
   tts_url: ""
