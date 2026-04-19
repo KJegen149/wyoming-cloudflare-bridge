@@ -1,0 +1,15 @@
+[Unit]
+Description=Wyoming Conversation Proxy
+After=wyoming-openwakeword.service
+Requires=wyoming-openwakeword.service
+
+[Service]
+Type=simple
+User=kyle
+SupplementaryGroups=spi
+ExecStart=/home/kyle/wyoming-satellite/.venv/bin/python /home/kyle/wyoming-conversation-proxy/proxy.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=Wyoming openWakeWord
+After=network.target
+
+[Service]
+Type=simple
+User=kyle
+ExecStart=/home/kyle/wyoming-openwakeword/.venv/bin/python -m wyoming_openwakeword \
+  --uri tcp://0.0.0.0:10400 \
+  --model jarvis_v2 \
+  --threshold 0.05 \
+  --custom-model-dir /home/kyle/wyoming-openwakeword/custom_wake_words
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

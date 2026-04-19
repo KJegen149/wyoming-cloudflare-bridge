@@ -1,0 +1,31 @@
+[Unit]
+Description=Wyoming Satellite
+After=wyoming-openwakeword.service
+Requires=wyoming-openwakeword.service
+
+[Service]
+Type=simple
+User=kyle
+SupplementaryGroups=spi
+ExecStartPre=/bin/sleep 5
+ExecStart=/home/kyle/wyoming-satellite/.venv/bin/python -m wyoming_satellite \
+  --name "Jarvis" \
+  --uri tcp://0.0.0.0:10700 \
+  --mic-command "arecord -D capture -r 16000 -c 2 -f S16_LE -t raw" \
+  --mic-command-channels 2 \
+  --mic-auto-gain 9 \
+  --mic-volume-multiplier 3.0 \
+  --snd-command "aplay -D playback -r 24000 -c 1 -f S16_LE -t raw" \
+  --wake-uri tcp://localhost:10401 \
+  --wake-word-name jarvis \
+  --detection-command "/home/kyle/wyoming-satellite/.venv/bin/python /home/kyle/led/led_wake.py" \
+  --stt-start-command "/home/kyle/wyoming-satellite/.venv/bin/python /home/kyle/led/led_listen.py" \
+  --stt-stop-command "/home/kyle/wyoming-satellite/.venv/bin/python /home/kyle/led/led_off.py" \
+  --tts-start-command "/home/kyle/wyoming-satellite/.venv/bin/python /home/kyle/led/led_speak.py" \
+  --tts-stop-command "/home/kyle/wyoming-satellite/.venv/bin/python /home/kyle/led/led_off.py" \
+  --tts-played-command "/home/kyle/led/conversation_start.sh"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
